@@ -151,7 +151,7 @@ fu_genesys_usbhub_firmware_parse(FuFirmware *firmware,
 		if (ic_type_revision == 50)
 			code_size = 0x8000;
 	} else {
-		code_size = 0x6000;
+		code_size = 0x10000;
 	}
 	fu_firmware_set_size(firmware, code_size);
 
