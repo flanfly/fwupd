@@ -1,8 +1,8 @@
 package main
 
 /*
-#cgo LDFLAGS: -Lbuild/libfwupd -Lbuild/libfwupdplugin -L/usr/lib/x86_64-linux-gnu/ -L/home/kai/.local/lib -L/home/kai/.local/lib/x86_64-linux-gnu -Wl,-Bstatic -lfwupdplugin -lfwupd -lgio-2.0 -lgobject-2.0 -lffi -lgmodule-2.0 -lglib-2.0 -ljson-glib-1.0 -lpcre -lmount -lxmlb -lgusb -lusb-1.0 -larchive -lxml2 -licuuc -licudata -llzma -llz4 -lselinux -lapr-1 -lresolv -lblkid -luuid -llzo2 -lbz2 -lnettle -lacl -lstdc++ -Wl,-Bdynamic -pthread -lm -lz -ldl -lgudev-1.0 -ludev
-#cgo CFLAGS: -Ilibfwupd -Ibuild -Ilibfwupdplugin -I/home/kai/.local/include/libxmlb-2 -I/home/kai/.local/include -I/home/kai/.local/include/glib-2.0 -I/home/kai/.local/lib/glib-2.0/include -pthread -I/home/kai/.local/include/libmount -I/home/kai/.local/include/blkid -I/home/kai/.local/lib/x86_64-linux-gnu/glib-2.0/include
+#cgo LDFLAGS: -Lbuild/libfwupd -Lbuild/libfwupdplugin -L/usr/lib/x86_64-linux-gnu/ -Lbuild/subprojects/gusb/gusb -Lbuild/subprojects/json-glib/json-glib -Lbuild/subprojects/libxmlb/src -Wl,-Bstatic -lfwupdplugin -lfwupd -lgio-2.0 -lgobject-2.0 -lffi -lgmodule-2.0 -lglib-2.0 -lgusb -ljson-glib-1.0 -lpcre -lmount -lxmlb -lusb-1.0 -larchive -llzma -lresolv -lselinux -lblkid -lnettle -lacl -lxml2 -lbz2 -llz4 -lzstd -licuuc -licudata -lstdc++ -luuid -Wl,-Bdynamic -pthread -lm -lz -ldl -ludev
+#cgo CFLAGS: -Ilibfwupd -Ibuild -Ilibfwupdplugin -Isubprojects/libxmlb/src -Ibuild/subprojects/libxmlb/src -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -pthread -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
 
 #include <stdio.h>
 #include <fwupd.h>
@@ -37,10 +37,10 @@ const char* doit(const char* path) {
 
   g_autoptr(FuProgress) progress = fu_progress_new(G_STRLOC);
   g_autoptr(GError) error_local = NULL;
-  if(!fu_plugin_runner_startup(plugin, progress, &error_local)) {
+  if(!fu_plugin_runner_startup(plugin, &error_local)) {
     g_prefix_error(&error_local,"startup()");
   } else {
-    if(!fu_plugin_runner_coldplug(plugin, progress, &error_local)) {
+    if(!fu_plugin_runner_coldplug(plugin, &error_local)) {
       g_prefix_error(&error_local,"coldplug()");
     }
   }
@@ -51,28 +51,28 @@ const char* doit(const char* path) {
 import "C"
 import (
 	"fmt"
-  "os"
-  "io/ioutil"
+	"io/ioutil"
+	"os"
 )
 
 func main() {
 	fmt.Println("fwupd version", C.GoString(C.fwupd_version_string()))
 	fmt.Println("fwupdplugin version", C.GoString(C.fu_version_string()))
 
-  dir, err := ioutil.ReadDir("/home/kai/fwupd/build/plugins")
-  if err != nil {
-    panic("readdir"+ err.Error())
-  }
+	dir, err := ioutil.ReadDir("/fwupd/build/plugins")
+	if err != nil {
+		panic("readdir" + err.Error())
+	}
 
-  for _, fi := range dir {
-    if !fi.IsDir() {
-      continue
-    }
-    fname := fmt.Sprint("/home/kai/fwupd/build/plugins/",fi.Name(),"/libfu_plugin_",fi.Name(),".so")
-    _, err = os.Stat(fname)
-    if err != nil {
-      continue
-    }
-    fmt.Println("name", C.GoString(C.doit(C.CString(fname))))
-  }
+	for _, fi := range dir {
+		if !fi.IsDir() {
+			continue
+		}
+		fname := fmt.Sprint("/fwupd/build/plugins/", fi.Name(), "/libfu_plugin_", fi.Name(), ".so")
+		_, err = os.Stat(fname)
+		if err != nil {
+			continue
+		}
+		fmt.Println("name", C.GoString(C.doit(C.CString(fname))))
+	}
 }
