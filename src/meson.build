@@ -278,6 +278,36 @@ executable(
   install_dir: daemon_dir
 )
 
+library(
+  'fwupdembed',
+  resources_src,
+  fu_hash,
+  sources: [
+    daemon_loader_src,
+    'fu-daemon.c',
+    'fu-main-embed.c',
+    daemon_src,
+  ],
+  include_directories: [
+    root_incdir,
+    fwupd_incdir,
+    fwupdplugin_incdir,
+  ],
+  dependencies: [
+    valgrind,
+    libsystemd,
+    daemon_dep,
+  ],
+  link_with: [
+    fwupd,
+    fwupdplugin,
+  ],
+  c_args: [
+    '-DFU_OFFLINE_DESTDIR=""',
+  ],
+  install: true,
+  install_dir: daemon_dir
+)
 endif
 
 if get_option('tests')
